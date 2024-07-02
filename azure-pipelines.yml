@@ -1,0 +1,39 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: StopContainers
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      addToPath: true
+
+  - task: UseAzureCLI@2
+    inputs:
+      azureSubscription: 'your_service_connection'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        #!/bin/bash
+
+        # Docker variables
+        CONTAINER_NAME="your_container_name"
+
+        # Azure variables
+        RESOURCE_GROUP="your_resource_group"
+        CONTAINER_GROUP="your_container_group"
+
+        # Stop and remove Docker container
+        echo "Stopping Docker container: $CONTAINER_NAME"
+        docker stop $CONTAINER_NAME
+        echo "Removing Docker container: $CONTAINER_NAME"
+        docker rm $CONTAINER_NAME
+
+        # Stop Azure container group
+        echo "Stopping Azure container group: $CONTAINER_GROUP in resource group: $RESOURCE_GROUP"
+        az container stop --resource-group $RESOURCE_GROUP --name $CONTAINER_GROUP
+    displayName: 'Stop and Remove Docker Container and Azure Container Group'
